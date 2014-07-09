@@ -14,21 +14,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with CUTE.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2007-2009 Peter Sommerlad, Emanuel Graf
+ * Copyright 2007-2011 Peter Sommerlad, Emanuel Graf
  *
  *********************************************************************************/
 
 #ifndef CUTE_EQUALS_H_
 #define CUTE_EQUALS_H_
+#if defined(__GXX_EXPERIMENTAL_CXX0X__)
+#define USE_STD0X 1
+#endif
 
 #include "cute_base.h"
+#include "cute_determine_version.h"
 #include "cute_demangle.h"
 #include <cmath>
 #include <limits>
 #include <ostream>
 #include <sstream>
+#include <algorithm>
 #if defined(USE_STD0X)
 #include <type_traits>
+#elif defined(USE_TR1)
+#include <tr1/type_traits>
 #else
 #include <boost/type_traits/is_integral.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
@@ -37,10 +44,16 @@
 namespace cute {
 #if defined(USE_STD0X)
 	namespace impl_place_for_traits = std;
+#elif defined(USE_TR1)
+	namespace impl_place_for_traits = std::tr1;
 #else
 	namespace impl_place_for_traits = boost;
 #endif
 	namespace equals_impl {
+
+		template <typename T>
+		std::ostream &to_stream(std::ostream &os,T const &t); // recursion needs forward
+
 		static inline std::string backslashQuoteTabNewline(std::string const &input){
 			std::string result;
 			result.reserve(input.size());
@@ -66,28 +79,92 @@ namespace cute {
 			struct is_output_streamable_impl {
 				static std::basic_ostream<CharT,Traits> & f();
 				static T const & g();
-				enum e { value = (sizeof(char) != sizeof(f()<<g())) };
+				enum e { value = (sizeof(char) != sizeof(f()<<g())) }; // assumes sizeof(char)!=sizeof(ostream&)
+			};
+			template <class CONT>
+			struct has_begin_end_const_member {
+				template <typename T, T, T> struct type_check;
+				template <typename C> static typename C::const_iterator test(
+						type_check<typename C::const_iterator (C::*)()const,&C::begin, &C::end>*);
+				template <typename C> static char test(...);
+				enum e { value = (sizeof(char) != sizeof(test<CONT>(0)))
+				};
 			};
 		}
 		template <class T, class CharT=char, class Traits=std::char_traits<CharT> >
 		struct is_output_streamable {
 			enum e { value=to_string_detail::is_output_streamable_impl<T,CharT,Traits>::value };
 		};
+		// detect standard container conforming begin() end() iterator accessors.
+		// might employ begin/end traits from c++0x for loop in the future. --> select_container
+		template <typename T>
+		struct printItWithDelimiter
+		{
+			std::ostream &os;
+			bool first; // allow use of for_each algorithm
+			printItWithDelimiter(std::ostream &os):os(os),first(true){}
+			void operator()(T const &t){
+				if (!first) os<<',';
+				else first=false;
+				os << '\n'; // use newlines so that CUTE's plug-in result viewer gives nice diffs
+				equals_impl::to_stream<T>(os,t);
+			}
+		};
+		//try print_pair with specialization of template function instead:
+		// the generic version prints about missing operator<< that is the last resort
+		template <typename T>
+		std::ostream &print_pair(std::ostream &os,T const &t){
+			return os << "no operator<<(ostream&, " <<cute::demangle(typeid(T).name())<<')';
+		}
+		//the std::pair overload is useful for std::map etc. however,
+		template <typename K, typename V>
+		std::ostream &print_pair(std::ostream &os,std::pair<K,V> const &p){
+			os << '[' ;
+			equals_impl::to_stream(os,p.first);
+			os << " -> ";
+			equals_impl::to_stream(os,p.second);
+			os << ']';
+			return os;
+		}
+
+		template <typename T, bool select>
+		struct select_container {
+			std::ostream &os;
+			select_container(std::ostream &os):os(os){}
+			std::ostream& operator()(T const &t){
+				printItWithDelimiter<typename T::value_type> printer(os);
+				os << cute::demangle(typeid(T).name()) << '{';
+				std::for_each(t.begin(),t.end(),printer);
+				return os << '}';
+			}
+		};
+
+		template <typename T>
+		struct select_container<T,false> {
+			std::ostream &os;
+			select_container(std::ostream &os):os(os){}
+			std::ostream & operator()(T const &t){
+				//  look for std::pair. a future with tuple might be useful as well, but not now.
+				return print_pair(os,t); // here a simple template function overload works.
+			}
+		};
+
 		template <typename T, bool select>
 		struct select_built_in_shift_if {
 			std::ostream &os;
-			select_built_in_shift_if(std::ostream &os):os(os){}
+			select_built_in_shift_if(std::ostream &ros):os(ros){}
 			std::ostream& operator()(T const &t){
-				return os << t ; // default uses operator<<(std::ostream&,T const&)
+				return os << t ; // default uses operator<<(std::ostream&,T const&) if available
 			}
 		};
 
 		template <typename T>
 		struct select_built_in_shift_if<T,false> {
 			std::ostream &os;
-			select_built_in_shift_if(std::ostream &os):os(os){}
+			select_built_in_shift_if(std::ostream &ros):os(ros){}
 			std::ostream & operator()(T const &t){
-				return os << "operator << not defined for type " <<cute::demangle(typeid(T).name());
+				// if no operator<< is found, try if it is a container or std::pair
+				return select_container<T,to_string_detail::has_begin_end_const_member<T>::value >(os)(t);
 			}
 		};
 		template <typename T>
@@ -120,7 +197,7 @@ namespace cute {
 		bool do_equals_floating_with_delta(ExpectedValue const &expected
 				,ActualValue const &actual
 				,DeltaValue const &delta) {
-			return !(std::abs(delta)  < std::abs(expected-actual));
+			return std::abs(delta)  >= std::abs(expected-actual);
 		}
 		template <typename ExpectedValue, typename ActualValue, bool select_non_floating_point_type>
 		bool do_equals_floating(ExpectedValue const &expected
@@ -195,11 +272,59 @@ namespace cute {
 		size_t nof_bits(IntegralType const &){
 			return std::numeric_limits<IntegralType>::digits;
 		}
+#if defined(USE_TR1)
+		template <typename ExpectedValue, typename ActualValue>
+		bool do_equals_integral(ExpectedValue const &expected
+				,ActualValue const &actual
+				,const impl_place_for_traits::true_type&,const impl_place_for_traits::true_type&){
+			if (nof_bits(expected) < nof_bits(actual))
+						return static_cast<ActualValue>(expected) == actual;
+			else
+						return expected == static_cast<ExpectedValue>(actual);
+			return false;
+		}
+		template <typename ExpectedValue, typename ActualValue>
+		bool do_equals_integral(ExpectedValue const &expected
+				,ActualValue const &actual
+				,const impl_place_for_traits::false_type&,const impl_place_for_traits::true_type&){
+//TODO complicated case, one signed one unsigned type. since it is about equality casting to the longer should work?
+			if (sizeof(ExpectedValue) >	sizeof(ActualValue))
+				return expected==static_cast<ExpectedValue>(actual);
+			else
+				return static_cast<ActualValue>(expected) == actual;
+		}
+		template <typename ExpectedValue, typename ActualValue>
+		bool do_equals_integral(ExpectedValue const &expected
+				,ActualValue const &actual
+				,const impl_place_for_traits::true_type&,const impl_place_for_traits::false_type&){
+//TODO
+			if (sizeof(ExpectedValue) < sizeof(ActualValue))
+				return static_cast<ActualValue>(expected)==	actual;
+			else
+				return expected == static_cast<ExpectedValue>(actual);
+		}
+		template <typename ExpectedValue, typename ActualValue>
+		bool do_equals_integral(ExpectedValue const &expected
+				,ActualValue const &actual
+				,const impl_place_for_traits::false_type&,const impl_place_for_traits::false_type&){
+			if (nof_bits(expected) < nof_bits(actual))
+						return static_cast<ActualValue>(expected) == actual;
+			else
+						return expected == static_cast<ExpectedValue>(actual);
+			return false;
+		}
+#endif
 		// will not work if either type is bool, therefore the overloads above.
 		template <typename ExpectedValue, typename ActualValue>
 		bool do_equals(ExpectedValue const &expected
 					,ActualValue const &actual
 					,const impl_place_for_traits::true_type&,const impl_place_for_traits::true_type&){
+#if defined(USE_TR1)
+			return do_equals_integral(expected,actual,
+					impl_place_for_traits::is_signed<ExpectedValue>()
+					,impl_place_for_traits::is_signed<ActualValue>());
+#else
+// TODO: replace the following code with a dispatcher on signed/unsigned
 			typedef typename impl_place_for_traits::make_signed<ExpectedValue>::type ex_s;
 			typedef typename impl_place_for_traits::make_signed<ActualValue>::type ac_s;
 				// need to sign extend with the longer type, should work...
@@ -208,6 +333,7 @@ namespace cute {
 					return static_cast<ac_s>(expected) == static_cast<ac_s>(actual);
 				else
 					return static_cast<ex_s>(expected) == static_cast<ex_s>(actual);
+#endif
 		}
 	} // namespace equals_impl
 	template <typename ExpectedValue, typename ActualValue>

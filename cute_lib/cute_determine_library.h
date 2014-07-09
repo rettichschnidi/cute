@@ -14,23 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with CUTE.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2007 Peter Sommerlad
+ * Copyright 2007-2011 Peter Sommerlad
  *
  *********************************************************************************/
 
-#ifndef IDE_LISTENER_H_
-#define IDE_LISTENER_H_
-#include "eclipse_listener.h"
-#include "vstudio_listener.h"
-namespace cute
-{
-// assume that we compile with gnu when using Eclipse CDT.
-// vstudio_listener is broken for VS later than 2003, TODO!
-#if defined(__GNUG__)
-typedef eclipse_listener ide_listener;
+#ifndef CUTE_DETERMINE_LIBRARY_H_
+#define CUTE_DETERMINE_LIBRARY_H_
+#if defined(USE_TR1)
+#include <tr1/functional>
+// bind already given by <functional> in cute_test.h from cute_suite.h
+namespace boost_or_tr1 = std::tr1;
+#elif defined(USE_STD0X)
+#include <functional>
+namespace boost_or_tr1 = std;
 #else
-typedef vstudio_listener ide_listener;
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+namespace boost_or_tr1 = boost;
 #endif
-}
 
-#endif /*IDE_LISTENER_H_*/
+#endif /*CUTE_DETERMINE_LIBRARY_H_*/

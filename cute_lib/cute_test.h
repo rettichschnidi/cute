@@ -19,20 +19,8 @@
  *********************************************************************************/
 #ifndef CUTE_TEST_H_
 #define CUTE_TEST_H_
-#if defined(__GXX_EXPERIMENTAL_CXX0X__)
-#define USE_STD0X 1
-#endif
-
-#if defined(USE_TR1)
-#include <tr1/functional>
-namespace boost_or_tr1 = std::tr1;
-#elif defined(USE_STD0X)
-#include <functional>
-namespace boost_or_tr1 = std;
-#else
-#include <boost/function.hpp>
-namespace boost_or_tr1 = boost;
-#endif
+#include "cute_determine_version.h"
+#include "cute_determine_library.h"
 #include "cute_demangle.h"
 // make plain functions as tests more 'cute':
 namespace cute {
@@ -46,8 +34,8 @@ namespace cute {
 		// but a name can also be given explicitely, e.g. for CUTE() macro
 		// for simple test functions
 		template <typename VoidFunctor>
-		test(VoidFunctor const &t, std::string name = demangle(typeid(VoidFunctor).name()))
-		:theTest(t),name_(name){}
+		test(VoidFunctor const &t, std::string sname = demangle(typeid(VoidFunctor).name()))
+		:theTest(t),name_(sname){}
 
 	private:
 		boost_or_tr1::function<void()> theTest;
