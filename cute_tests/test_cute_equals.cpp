@@ -117,7 +117,7 @@ void test_equals_double(){
 }
 void test_equals_double_with_numberic_limits(){
 	ASSERT_EQUAL(1.0,1.0+10*eps);
-    ASSERT_THROWS(ASSERT_EQUAL(1.0,1.0+11*eps),cute::test_failure);
+	ASSERT_THROWS(ASSERT_EQUAL(1.0,1.0+11*eps),cute::test_failure);
 }
 void test_equals_float(){
 	ASSERT_EQUAL(float(10e7),float(100+10e7)); // assume 6 digit "precision" delta
@@ -237,7 +237,7 @@ void test_not_has_end_member_for_int(){
 
 void test_equalsTwoNaNFails()
 {
-    ASSERT_THROWS(ASSERT_EQUAL(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN()),cute::test_failure);
+	ASSERT_THROWS(ASSERT_EQUAL(std::numeric_limits<double>::quiet_NaN(),std::numeric_limits<double>::quiet_NaN()),cute::test_failure);
 }
 
 void test_doubleEqualsWithANaNFails(){

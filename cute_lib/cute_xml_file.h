@@ -2,7 +2,7 @@
  * cute_xml_file.h
  *
  *  Created on: 07.06.2013
- *      Author: sop
+ *	  Author: sop
  */
 
 #ifndef CUTE_XML_FILE_H_
