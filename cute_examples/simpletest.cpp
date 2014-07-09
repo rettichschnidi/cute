@@ -18,69 +18,74 @@
  *
  *********************************************************************************/
 
-#include "cute.h"
-
-int lifeTheUniverseAndEverything = 41;
-
-void mysimpletest(){
-    ASSERT(lifeTheUniverseAndEverything == 6*7);
-}
 #include <iostream>
 #include "cute_runner.h"
-int main1(){
+#include "ide_listener.h"
+#include "cute.h"
+
+int lifeTheUniverseAndEverything = 42;
+
+void mySimpleTest() {
+	ASSERT_EQUAL(lifeTheUniverseAndEverything, 6 * 7);
+}
+
+void example1() {
 	using namespace std;
-	cute::test t=CUTE(mysimpletest);
-	if (cute::runner<>()(t)){
+	cute::test successfulTest = CUTE(mySimpleTest);
+	cute::ide_listener<> lis;
+	cute::runner<cute::ide_listener<> > run = cute::makeRunner(lis);
+	if (run(successfulTest)) {
 		cout << "OK" << endl;
 	} else {
 		cout << "failed" << endl;
 	}
-	return 0;
 }
-#include "ide_listener.h"
-int main2(){
+
+void example2() {
 	using namespace std;
-
-	return cute::runner<cute::ide_listener>()(CUTE(mysimpletest));
+	cute::ide_listener<> lis;
+	cute::makeRunner(lis)(CUTE(mySimpleTest));
 }
 
-
-#include "cute_test.h"
-#include "cute_equals.h"
-int anothertest(){
-	ASSERT_EQUAL(42,lifeTheUniverseAndEverything);
+int anotherTest() {
+	ASSERT_EQUAL(42, lifeTheUniverseAndEverything);
 	return 0;
 }
 
-cute::test tests[]={
+cute::test tests[] = {
 #ifdef __GNUG__
-	CUTE(mysimpletest)
-	,mysimpletest
-	,CUTE(anothertest)
+		CUTE(mySimpleTest), mySimpleTest, CUTE(anotherTest)
 #else /* for MSVC... */
-	CUTE(mysimpletest)
-	,CUTE(mysimpletest)
-	,CUTE(reinterpret_cast<void(*)()>(anothertest))
+		CUTE(mySimpleTest)
+		,CUTE(mySimpleTest)
+		,CUTE(reinterpret_cast<void(*)()>(anotherTest))
 #endif
-};
+	};
 
 struct ATestFunctor {
-	void operator()(){
-		ASSERT_EQUAL_DELTA(42.0,static_cast<double>(lifeTheUniverseAndEverything),0.001);
+	void operator()() {
+		ASSERT_EQUAL_DELTA(42.0,
+				static_cast<double>(lifeTheUniverseAndEverything), 0.001);
 	}
 };
-#include "cute_suite.h"
-int main3(){
-	using namespace std;
 
-	cute::runner<cute::ide_listener> run;
-	cute::suite s(tests,tests+(sizeof(tests)/sizeof(tests[0])));
-	s+=ATestFunctor();
-	return run(s,"suite");
+void failingTestWithMessage() {
+	ASSERTM("This message is displayed when the test fails.", false);
 }
 
-int main(){
-	main1();
-	main2();
-	main3();
+void example3() {
+	using namespace std;
+	cute::ide_listener<> lis;
+	cute::runner<cute::ide_listener<> > run = cute::makeRunner(lis);
+	cute::suite s(tests, tests + (sizeof(tests) / sizeof(tests[0])));
+	s += ATestFunctor();
+	cute::test failingTest = cute::test(failingTestWithMessage);
+	s += failingTest;
+	run(s, "suite");
+}
+
+int main() {
+	example1();
+	example2();
+	example3();
 }
