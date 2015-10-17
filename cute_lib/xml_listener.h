@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with CUTE.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2007-2013 Peter Sommerlad
+ * Copyright 2007-2015 Peter Sommerlad
  *
  *********************************************************************************/
 
@@ -30,12 +30,18 @@ namespace cute {
 	protected:
 		std::string mask_xml_chars(std::string in){
 			std::string::size_type pos=0;
-			while((pos=in.find_first_of("<&\"",pos))!=std::string::npos){
+			while((pos=in.find_first_of("\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0b\x0c\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\"&'<>", pos, 34))!=std::string::npos){
 				switch(in[pos]){
 				case '&': in.replace(pos,1,"&amp;"); pos +=5; break;
 				case '<': in.replace(pos,1,"&lt;"); pos += 4; break;
+				case '>': in.replace(pos,1,"&gt;"); pos += 4; break;
 				case '"': in.replace(pos,1,"&quot;"); pos+=6; break;
-				default: throw "oops";break;
+				case '\'':in.replace(pos,1,"&apos;"); pos+=6; break;
+				default:
+					char c = in[pos];
+					std::string replacement = "0x" + cute_to_string::hexit(c);
+					in.replace(pos, 1, replacement); pos += replacement.size(); break;
+					break;
 				}
 			}
 			return in;
@@ -52,7 +58,7 @@ namespace cute {
 
 		void begin(suite const &t,char const *info, size_t n_of_tests){
 			current_suite=mask_xml_chars(info);
-			out << "\t<testsuite name=\"" << current_suite << "\" tests=\"" << n_of_tests << "\">\n";
+			out << std::dec << "\t<testsuite name=\"" << current_suite << "\" tests=\"" << n_of_tests << "\">\n";
 			Listener::begin(t,info, n_of_tests);
 		}
 		void end(suite const &t, char const *info){
@@ -69,7 +75,7 @@ namespace cute {
 			Listener::success(t,msg);
 		}
 		void failure(test const &t,test_failure const &e){
-			out <<  ">\n\t\t\t<failure message=\"" << mask_xml_chars(e.filename) << ":" << e.lineno << " "
+			out << std::dec <<  ">\n\t\t\t<failure message=\"" << mask_xml_chars(e.filename) << ":" << e.lineno << " "
 				<< mask_xml_chars(e.reason) << "\">\n"<<mask_xml_chars(e.reason)<<"\n\t\t\t</failure>\n\t\t</testcase>\n";
 			Listener::failure(t,e);
 		}
