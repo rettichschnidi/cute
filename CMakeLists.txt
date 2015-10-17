@@ -9,6 +9,11 @@ include_directories(
   cute_lib
 )
 
+#Add headers to QtCreator project
+file(GLOB_RECURSE INCLUDES_LIST cute_lib/ cute_lib/*.h)
+add_library(allincludes STATIC ${INCLUDES_LIST})
+set_target_properties(allincludes PROPERTIES LINKER_LANGUAGE CXX)
+
 #Add the examples folder
 add_subdirectory(cute_examples)
 
