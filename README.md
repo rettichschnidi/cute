@@ -1,4 +1,4 @@
-About this repository
+About this repository  [![Build Status](https://travis-ci.org/rettichschnidi/cute.svg?branch=master)](https://travis-ci.org/rettichschnidi/cute)
 =====================
 This repository contains the latest version of the CUTE headers plus some minor
 changes. Its sole purpose is to allow me to include the CUTE headers as git
