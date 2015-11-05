@@ -14,6 +14,12 @@ file(GLOB_RECURSE INCLUDES_LIST cute_lib/ cute_lib/*.h)
 add_library(allincludes STATIC ${INCLUDES_LIST})
 set_target_properties(allincludes PROPERTIES LINKER_LANGUAGE CXX)
 
+option(CUTE_ENABLE_GCOV "Enable GCOV on generated binaries" ON)
+if(CUTE_ENABLE_GCOV)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O -g --coverage")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif()
+
 #Add the examples folder
 add_subdirectory(cute_examples)
 
