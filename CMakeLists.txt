@@ -1,6 +1,6 @@
 set(PROJECT_NAME "CUTE")
 project(${PROJECT_NAME})
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.2)
 
 #Enable C++11 and C11 on all targets
 set(CMAKE_CXX_STANDARD 11)
