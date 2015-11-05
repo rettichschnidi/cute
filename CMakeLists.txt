@@ -14,6 +14,9 @@ file(GLOB_RECURSE INCLUDES_LIST cute_lib/ cute_lib/*.h)
 add_library(allincludes STATIC ${INCLUDES_LIST})
 set_target_properties(allincludes PROPERTIES LINKER_LANGUAGE CXX)
 
+#Add the CUTE nature to generated Eclipse projects
+set_property(GLOBAL APPEND PROPERTY ECLIPSE_EXTRA_NATURES "ch.hsr.ifs.cute.ui.cutenature")
+
 option(CUTE_ENABLE_GCOV "Enable GCOV on generated binaries" ON)
 if(CUTE_ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O -g --coverage")
