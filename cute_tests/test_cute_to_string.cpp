@@ -50,24 +50,24 @@ void test_multiset_to_string(){
 // MS VC++ will not detect std::map/std::set as a container, because their begin/end member functions are defined in their superclass... :-(
 }
 
-void test_map_to_string(){
-	std::map<std::string,std::string> m;
-	m["one"]="two";
-	m["three"]="four";
-	m["five"]="six";
-	std::string exp="std::map<std::string, std::string, std::less<std::string>, std::allocator<std::pair<std::string const, std::string> > >{"
-"\n[five -> six],\n[one -> two],\n[three -> four]}";
+void test_map_to_int(){
+	std::map<int,int> m;
+	m[5]=6;
+	m[3]=4;
+	m[1]=2;
+	std::string exp="std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >{"
+"\n[1 -> 2],\n[3 -> 4],\n[5 -> 6]}";
 	std::string res=to_string(m);
 	ASSERT_EQUAL(exp,res);
 // MS VC++ will not detect std::map/std::set as a container, because their begin/end member functions are defined in their superclass... :-(
 }
-void test_multimap_to_string(){
-	std::multimap<std::string,std::string> m;
-	m.insert(std::pair<std::string,std::string>("one","two"));
-	m.insert(std::pair<std::string,std::string>("one","three"));
-	m.insert(std::pair<std::string,std::string>("three","four"));
-	std::string exp="std::multimap<std::string, std::string, std::less<std::string>, std::allocator<std::pair<std::string const, std::string> > >{"
-"\n[one -> two],\n[one -> three],\n[three -> four]}"; // fragile!
+void test_multimap_to_int(){
+	std::multimap<int,int> m;
+	m.insert(std::pair<int,int>(1,2));
+	m.insert(std::pair<int,int>(1,3));
+	m.insert(std::pair<int,int>(3,4));
+	std::string exp="std::multimap<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >{"
+"\n[1 -> 2],\n[1 -> 3],\n[3 -> 4]}"; // fragile!
 	std::string res=to_string(m);
 	ASSERT_EQUAL(exp,res);
 // MS VC++ will not detect std::map/std::set as a container, because their begin/end member functions are defined in their superclass... :-(
@@ -89,8 +89,8 @@ cute::suite test_cute_to_string(){
 	s.push_back(CUTE(test_pair_to_string));
 	s.push_back(CUTE(test_vector_pair_to_string));
 	s.push_back(CUTE(test_set_to_string));
-	s.push_back(CUTE(test_map_to_string));
-	s.push_back(CUTE(test_multimap_to_string));
+	s.push_back(CUTE(test_map_to_int));
+	s.push_back(CUTE(test_multimap_to_int));
 	s.push_back(CUTE(test_multiset_to_string));
 	return s;
 

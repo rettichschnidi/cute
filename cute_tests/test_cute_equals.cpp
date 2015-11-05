@@ -145,23 +145,23 @@ void test_backslashQuoteTabNewline(){
 
 #include <map>
 void test_output_for_std_map_empty(){
-	std::map<std::string,std::string> m;
+	std::map<int, int> m;
 	std::ostringstream out;
 	cute::cute_to_string::to_stream(out,m);
-	std::string exp="std::map<std::string, std::string, std::less<std::string>, std::allocator<std::pair<std::string const, std::string> > >{}";
+	std::string exp="std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >{}";
 	ASSERT_EQUAL(exp,out.str());
 }
 
 
 void test_output_for_std_map() {
-	std::map<std::string,std::string> m;
-	m["one"]="two";
-	m["three"]="four";
-	m["five"]="six";
+	std::map<int,int> m;
+	m[3]=4;
+	m[5]=6;
+	m[1]=2;
 	std::ostringstream out;
 	cute::cute_to_string::to_stream(out,m);
-	std::string exp="std::map<std::string, std::string, std::less<std::string>, std::allocator<std::pair<std::string const, std::string> > >{"
-"\n[five -> six],\n[one -> two],\n[three -> four]}";
+	std::string exp="std::map<int, int, std::less<int>, std::allocator<std::pair<int const, int> > >{"
+"\n[1 -> 2],\n[3 -> 4],\n[5 -> 6]}";
 
 	ASSERT_EQUAL(exp,(out.str()));
 }
