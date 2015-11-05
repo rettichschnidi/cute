@@ -51,8 +51,8 @@ void test_xml_masking(){
 		run(CUTE(test_xml_chars_in_failure));
 	}
 	ASSERT_EQUAL("<testsuites>\n\t\t<testcase classname=\"\" name=\"test_xml_chars_in_failure\">\n"
-			"\t\t\t<failure message=\"dummy.cpp:42 and &amp; &lt;or/> &quot;hello&quot;\">\n"
-			"and &amp; &lt;or/> &quot;hello&quot;\n"
+			"\t\t\t<failure message=\"dummy.cpp:42 and &amp; &lt;or/&gt; &quot;hello&quot;\">\n"
+			"and &amp; &lt;or/&gt; &quot;hello&quot;\n"
 			"\t\t\t</failure>\n\t\t</testcase>\n</testsuites>\n",out.str());
 }
 
