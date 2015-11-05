@@ -29,7 +29,7 @@ endif()
 add_subdirectory(cute_examples)
 
 #Add option to enable/disable the CUTE tests
-option(CUTE_BUILD_TESTS "Build the CUTE self-tests" TRUE)
+option(CUTE_BUILD_TESTS "Build the CUTE self-tests" ON)
 if(CUTE_BUILD_TESTS)
   enable_testing()
   add_subdirectory(cute_tests)
