@@ -20,7 +20,7 @@
 
 #include "cute.h"
 #include "cute_runner.h"
-#include "cute_counting_listener.h"
+#include "summary_listener.h"
 #include "ide_listener.h"
 #include "xml_listener.h"
 #include <iostream>
@@ -42,6 +42,7 @@
 #include "test_cute_filter_runner.h"
 #include "test_cute_relops.h"
 #include "test_cute_data_driven.h"
+#include "test_summary_listener.h"
 
 using namespace cute;
 // some brain dead test cases to find out my bug using function
@@ -105,6 +106,7 @@ int main(int argc, char const *argv[]){
 	s += make_suite_test_xml_listener();
 	s += make_suite_test_xml_file_opener();
 	s += make_suite_test_cute_to_string_embedded();
+	s += make_suite_test_summary_listener();
 	s += test_cute_to_string();
 	s += test_cute_equals();
 	// the following test produces one of the 2 expected errors, since it throws
@@ -128,12 +130,7 @@ int main(int argc, char const *argv[]){
 	s += CUTE_INCARNATE_WITH_CONTEXT(to_incarnate,boost_or_tr1::ref(std::cout));
 	s += CUTE_CONTEXT_MEMFUN(boost_or_tr1::ref(std::cerr),to_incarnate,operator());
 	cute::xml_file_opener xmlfile(argc,argv);
-	cute::xml_listener<cute::counting_listener<cute::ide_listener<> > > l(xmlfile.out);
+	cute::xml_listener<cute::summary_listener<cute::ide_listener<> > > l(xmlfile.out, cerr);
 	cute::makeRunner(l,argc,argv)(s,"all cute tests");
-	cout << flush;
-	cerr << flush;
-	cerr << l.numberOfTests << " Tests - expect " << s.size() << endl;
-	cerr << l.failedTests << " failed - expect 0 failures" << endl;
-	cerr << l.errors << " errors - expect 0 errors" << endl;
 	return l.failedTests;
 }

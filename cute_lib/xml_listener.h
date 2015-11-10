@@ -49,7 +49,9 @@ namespace cute {
 		std::ostream &out;
 		std::string current_suite;
 	public:
-		xml_listener(std::ostream &os):out(os) {
+		template<typename ... Tail>
+		xml_listener(std::ostream &os, Tail&& ... tail)
+			:Listener(std::forward<Tail>(tail)  ...),out(os) {
 			out << "<testsuites>\n";
 		}
 		~xml_listener(){
