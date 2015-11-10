@@ -2,8 +2,9 @@ set(PROJECT_NAME "CUTE")
 project(${PROJECT_NAME})
 cmake_minimum_required(VERSION 3.2)
 
-#Enable C++11 and C11 on all targets
+#Enable (and enforce) C++11 on all targets
 set(CMAKE_CXX_STANDARD 11)
+set(CXX_STANDARD_REQUIRED ON)
 
 # Add project cmake modules to path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/coveralls/cmake)

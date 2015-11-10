@@ -33,6 +33,9 @@ namespace cute {
 	struct ide_listener: public Listener
 	{
 		ide_listener(std::ostream &os=std::cout):out(os) {}
+		template<typename ... Tail>
+		ide_listener(std::ostream &os, Tail&& ... tail)
+		:Listener(std::forward<Tail>(tail)...),out(os) {}
 		void begin(suite const &t,char const *info, size_t n_of_tests){
 			out << std::dec << "\n#beginning " << info << " " << n_of_tests << '\n';
 			Listener::begin(t,info,n_of_tests);
