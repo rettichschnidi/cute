@@ -26,8 +26,9 @@
 namespace cute{
 		template <typename Listener=null_listener>
 		struct summary_listener:counting_listener<Listener> {
-				summary_listener(std::ostream &os)
-				:counting_listener<Listener>(),out(os){}
+				template<typename ... Tail>
+				summary_listener(std::ostream &os, Tail&& ... tail)
+				:counting_listener<Listener>(std::forward<Tail>(tail)  ...),out(os) {}
 
 				~summary_listener() {
 						out << "\nUnit testing results:\n";

@@ -24,8 +24,9 @@
 namespace cute{
 	template <typename Listener=null_listener>
 	struct counting_listener:Listener{
-		counting_listener()
-		:Listener()
+		template<typename ... Args>
+		counting_listener(Args&& ... args)
+			:Listener(std::forward<Args>(args)...)
 		,numberOfTests(0),successfulTests(0),failedTests(0),errors(0),numberOfSuites(0),numberOfTestsInSuites(0){}
 
 		counting_listener(Listener const &s)
