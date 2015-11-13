@@ -27,7 +27,7 @@ struct TestClass{
 	static int callcounter;
 	int i;
 	TestClass():i(1){}
-	TestClass(int j):i(j){} // for incarnation
+	explicit TestClass(int j):i(j){} // for incarnation
 	void test1(){
 		++callcounter;
 		ASSERT_EQUAL(1,i++);
