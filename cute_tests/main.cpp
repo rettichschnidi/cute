@@ -76,7 +76,7 @@ struct test3{
 // demonstrates how test objects are incarnated
 struct to_incarnate{
 	std::ostream &out;
-	to_incarnate(std::ostream &os):out(os){
+	explicit to_incarnate(std::ostream &os):out(os){
 		out << "born" << std::endl;
 	}
 	to_incarnate(to_incarnate &other):out(other.out){} // copy ctor would be deleted and is required by std::function ctor
