@@ -46,7 +46,7 @@ namespace {
 
 	struct IncarnateContextTest {
 		int &counter;
-		IncarnateContextTest(int &c):counter(c){
+		explicit IncarnateContextTest(int &c):counter(c){
 			counter=10;
 		}
 		IncarnateContextTest(IncarnateContextTest &other):counter(other.counter){}
