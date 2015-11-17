@@ -5,6 +5,12 @@ cmake_minimum_required(VERSION 3.2)
 #Enable C++11 and C11 on all targets
 set(CMAKE_CXX_STANDARD 11)
 
+# Add project cmake modules to path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/coveralls/cmake)
+
+#Import command cmake_dependent_option
+include(CMakeDependentOption)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
 
 include_directories(
@@ -33,4 +39,13 @@ option(CUTE_BUILD_TESTS "Build the CUTE self-tests" ON)
 if(CUTE_BUILD_TESTS)
   enable_testing()
   add_subdirectory(cute_tests)
+endif()
+
+# We probably don't want this to run on every build.
+cmake_dependent_option(CUTE_ENABLE_COVERALLS "Generate coveralls data" OFF "CUTE_ENABLE_GCOV;CUTE_BUILD_TESTS" OFF)
+if (CUTE_ENABLE_COVERALLS)
+  include(Coveralls)
+
+  # Create the coveralls target.
+  coveralls_setup("${INCLUDES_LIST}" ON)
 endif()
