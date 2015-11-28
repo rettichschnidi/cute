@@ -1,4 +1,5 @@
-option(CUTE_BUILD_EXAMPLES "Build the CUTE examples" TRUE)
+option(CUTE_BUILD_EXAMPLES "Build the CUTE examples" ${${CUTE_STANDALONE}})
 if(CUTE_BUILD_EXAMPLES)
   add_executable(cute_example simpletest.cpp)
+  target_link_libraries(cute_example cute)
 endif()
