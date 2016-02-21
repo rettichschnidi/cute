@@ -72,7 +72,7 @@ namespace cute {
 	public:
 		bool const shouldrunsuite;
 		ArgvTestFilter(std::string const &info, std::vector<std::string> const &args)
-		:shouldrunsuite(shouldRunSuite(info,args)){}
+		:match(), shouldrunsuite(shouldRunSuite(info,args)){}
 		bool shouldRun(const std::string & name) const
 		{
 			return match.empty() || match.count(name);
@@ -83,7 +83,7 @@ namespace cute {
 	struct runner{
 		Listener &listener;
 		std::vector<std::string> args;
-		runner(Listener &l, int argc = 0, const char *const *argv = 0):listener(l){
+		runner(Listener &l, int argc = 0, const char *const *argv = 0):listener(l), args() {
 			if(needsFiltering(argc,argv)){
 				args.reserve(argc-1);
 				std::remove_copy_if(argv + 1, argv + argc,back_inserter(args),std::logical_not<char const *>());

@@ -24,7 +24,8 @@ struct mock_listener {
 	mock_listener()
 	:begincount(0),endcount(0),startcount(0)
 	,successcount(0),failurecount(0),errorcount(0)
-	,suitetestcount(0){}
+	,suitetestcount(0), infomessages(), errormessages(),
+	successmessages(){}
 	void begin(suite const &,char const *info,size_t n){
 		++begincount;
 		suitetestcount += n;

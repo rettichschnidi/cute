@@ -26,7 +26,7 @@ using namespace cute;
 namespace {
 struct TestRepetition {
 	int n;
-	TestRepetition(){ n = 0;}
+	TestRepetition():n(0){}
 	void operator()(){ ++n; }
 };
 void repeat_test(){
