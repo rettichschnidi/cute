@@ -1,10 +1,14 @@
+sudo: false
 language: cpp
+addons:
+  apt:
+    packages:
+      - curl
 compiler:
   - clang
 before_install:
-  - sudo apt-get update -qq || true
-  - sudo apt-get install curl
-  - curl https://cmake.org/files/v3.3/cmake-3.3.2-Linux-x86_64.sh -o cmake.sh
-  - sudo sh cmake.sh --exclude-subdir --prefix=/usr/local
+  - curl https://cmake.org/files/v3.4/cmake-3.4.0-Linux-x86_64.tar.gz -o cmake-3.4.0-Linux-x86_64.tar.gz
+  - tar xf cmake-3.4.0-Linux-x86_64.tar.gz
+  - export PATH=$PWD/cmake-3.4.0-Linux-x86_64/bin/:$PATH
 script:
   - travis/build.sh
