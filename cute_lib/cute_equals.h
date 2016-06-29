@@ -26,16 +26,28 @@
 #include <cmath>
 #include <limits>
 #include <algorithm>
+#include <type_traits>
 
 
 namespace cute {
 	namespace cute_do_equals {
+		// avoid warnings when calling std::abs on unsigned types
+		template <typename Value>
+		typename std::enable_if<std::is_unsigned<Value>::value, Value>::type
+		conditional_abs(Value const &value) {
+			return value;
+		}
+		template <typename Value>
+		typename std::enable_if<std::is_signed<Value>::value, Value>::type
+		conditional_abs(Value const &value) {
+			return std::abs(value);
+		}
 		// provide some template meta programming tricks to select "correct" comparison for floating point and integer types
 		template <typename ExpectedValue, typename ActualValue, typename DeltaValue>
 		bool do_equals_floating_with_delta(ExpectedValue const &expected
 				,ActualValue const &actual
 				,DeltaValue const &delta) {
-			return std::abs(delta)  >= std::abs(expected-actual);
+			return conditional_abs(delta) >= conditional_abs(expected-actual);
 		}
 		template <typename ExpectedValue, typename ActualValue, bool select_non_floating_point_type>
 		bool do_equals_floating(ExpectedValue const &expected
@@ -102,15 +114,15 @@ namespace cute {
 		// do not forget the inline on a non-template overload!
 		// this overload is needed to actually avoid ambiguity for comparing bool==bool as a best match
 		inline bool do_equals(bool const &expected
-					  ,bool const &actual
-					  , const impl_place_for_traits::true_type&,const impl_place_for_traits::true_type&){
+						,bool const &actual
+						, const impl_place_for_traits::true_type&,const impl_place_for_traits::true_type&){
 			return expected==actual;
 		}
 		// overload for char const *, my test case failed because VC++ doesn't use string constant folding like g++/clang
 		// a feature where we should do string comparison
 		inline bool do_equals(char const *const &expected
-					  ,char const *const &actual
-					  , const impl_place_for_traits::false_type&,const impl_place_for_traits::false_type&){
+						,char const *const &actual
+						, const impl_place_for_traits::false_type&,const impl_place_for_traits::false_type&){
 			return std::string(expected) == actual;
 		}
 		template <typename IntegralType>
